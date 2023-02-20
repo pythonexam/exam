@@ -1,0 +1,9 @@
+ATG: Methionine
+TTT: Phenylalanine
+TTA: Leucine
+TCT: Serine
+TAT: Tyrosine
+TAC: Tyrosine
+TGT: Cysteine
+TGG: Tryptophan
+TAA: STOP
