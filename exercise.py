@@ -120,7 +120,7 @@ df_gauss=df.dropna(axis=0)
 df[(df['PigType'] == 'wild boar') & (df['DETECTED'] == True)]['dist_boar'].mean()
 
 
-
+df['bool']=df['DYRK1A_N']>0.45
 
 
 df[(df['PigType'] == 'wild boar') & (df['DETECTED'] == True)]['dist_pig'].mean()
@@ -128,12 +128,6 @@ df[(df['PigType'] == 'wild boar') & (df['DETECTED'] == True)]['dist_pig'].mean()
 
 df[(df['PigType'].isin(['domesticated - pot bellied', 'domesticated'])) & (df['DETECTED'] == True)]['dist_boar'].mean()
 
-
-plt.hist(howell[(howell['male']==True) & (howell['age']>18)]['height']
-         ,bins='auto',density=True,label='Adult Males')
-
-plt.hist(howell[(howell['male']==False) & (howell['age']>18)]['height']
-         ,bins='auto',density=True,label='Adult Femalse',alpha=.8)
 
 
 #2 value in one column isin    
@@ -306,10 +300,20 @@ print(df['standardized'].std())
 ############################################################################################################################################
 
 
+fig, ax = plt.subplots(nrows=2,figsize =(6,8))
+ax[0].hist(df[df['male']==True]['age'], bins='auto',density=True)
+ax[0].hist(df[df['male']==False]['age'], bins='auto',density=True)
+
+ax[1].hist(df[(df['male']==True) & (df['height'] > 1.2)]['age'], bins='auto',density=True)
+ax[1].hist(df[(df['male']==False) & (df['height'] > 1.2)]['age'], bins='auto',density=True)
 
 
 
+plt.hist(howell[(howell['male']==True) & (howell['age']>18)]['height']
+         ,bins='auto',density=True,label='Adult Males')
 
+plt.hist(howell[(howell['male']==False) & (howell['age']>18)]['height']
+         ,bins='auto',density=True,label='Adult Femalse',alpha=.8)
 
 
 
@@ -456,6 +460,31 @@ for i in range(1, 78):
 
 
 
+def gaussian(x, mean, std):
+    return (1 / (np.sqrt(2 * np.pi) * std)) * np.exp(-((x - mean) ** 2) / (2 * (std ** 2)))
+
+# Load data into a Pandas DataFrame
+df = pd.read_csv("data.csv")
+
+# Loop through each row of the DataFrame
+for index, row in df.iterrows():
+    mean = row['mean']
+    std = row['std']
+    x = np.linspace(mean - 4 * std, mean + 4 * std, 100)
+    y = gaussian(x, mean, std)
+    
+    # Create a new plot for each row
+    fig, ax = plt.subplots()
+    ax.plot(x, y)
+    
+    # Add labels and a title to the plot
+    ax.set_xlabel("x")
+    ax.set_ylabel("y")
+    ax.set_title(f"Gaussian Function for row {index}")
+    
+    # Display the plot
+    plt.show()
+
 
 ###########################################################################################################################################
 
@@ -570,6 +599,17 @@ plt.hist(pm.draw(value2 ,draws=10000), bins='auto')
 plt.show()
 
 
+
+model=pm.Model()
+with model:
+    mu=pm.Normal('mu', 0, 5)
+    sigma=pm.Exponential('sigma', 1)
+    observ=df['expected_w_dens'] - df['w_dens']
+    error=pm.Normal('error', mu,sigma,observed=observ)
+    trace=pm.sample()
+
+pm.plot_posterior(trace)
+pm.summary(trace)    
 ###################################################################################################################################################
 
 
