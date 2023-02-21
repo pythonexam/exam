@@ -296,6 +296,8 @@ print(df['standardized'].mean())
 print(df['standardized'].std())
 
 
+df.filter(regex='ght') ----> will only keep thoes columns with 'ght' characters
+
 
 ############################################################################################################################################
 
